@@ -1,0 +1,56 @@
+body {
+    background-color: #f9f9f9;
+}
+
+h1 {
+    font-size: 2rem;
+}
+
+table th, table td {
+    vertical-align: middle;
+}
+
+/* Enhanced table styling for market analysis */
+.table {
+    font-size: 0.9rem;
+}
+
+.table th {
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.table td {
+    max-width: 150px;
+    word-wrap: break-word;
+}
+
+/* Badge styling for market insights */
+.badge {
+    font-size: 0.75rem;
+    padding: 0.4em 0.6em;
+}
+
+/* Responsive table wrapper */
+.table-responsive {
+    border: 1px solid #dee2e6;
+    border-radius: 0.375rem;
+}
+
+/* Market insight column styling */
+.text-muted {
+    font-size: 0.8rem;
+}
+
+/* Score column highlighting */
+.bg-success {
+    background-color: #198754 !important;
+}
+
+.bg-warning {
+    background-color: #fd7e14 !important;
+}
+
+.bg-danger {
+    background-color: #dc3545 !important;
+}

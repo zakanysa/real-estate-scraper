@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Keresési eredmények</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container my-4">
+        <h1 class="mb-4 text-center">Keresési eredmények</h1>
+
+        <form class="mb-3" method="get" action="/results">
+            <!-- Preserve all filter parameters when sorting -->
+            {% if request.args.get("type") %}
+                <input type="hidden" name="type" value="{{ request.args.get('type') }}">
+            {% endif %}
+            {% if request.args.get("location") %}
+                <input type="hidden" name="location" value="{{ request.args.get('location') }}">
+            {% endif %}
+            {% if request.args.get("min_price") %}
+                <input type="hidden" name="min_price" value="{{ request.args.get('min_price') }}">
+            {% endif %}
+            {% if request.args.get("max_price") %}
+                <input type="hidden" name="max_price" value="{{ request.args.get('max_price') }}">
+            {% endif %}
+            {% if request.args.get("min_size") %}
+                <input type="hidden" name="min_size" value="{{ request.args.get('min_size') }}">
+            {% endif %}
+            {% if request.args.get("max_size") %}
+                <input type="hidden" name="max_size" value="{{ request.args.get('max_size') }}">
+            {% endif %}
+            {% if request.args.get("min_rooms") %}
+                <input type="hidden" name="min_rooms" value="{{ request.args.get('min_rooms') }}">
+            {% endif %}
+            {% if request.args.get("max_rooms") %}
+                <input type="hidden" name="max_rooms" value="{{ request.args.get('max_rooms') }}">
+            {% endif %}
+            
+            <div class="row justify-content-between align-items-end">
+                <div class="col-md-3">
+                    <a href="/" class="btn btn-outline-primary">Vissza a kereséshez</a>
+                </div>
+                <div class="col-md-5 d-flex gap-2">
+                    <select class="form-select" id="sort" name="sort">
+                        <option value="worth_it_desc" {% if request.args.get("sort") == "worth_it_desc" %}selected{% endif %}>Legjobb ár-érték arány</option>
+                        <option value="worth_it_asc" {% if request.args.get("sort") == "worth_it_asc" %}selected{% endif %}>Legrosszabb ár-érték arány</option>
+                        <option value="price_diff_asc" {% if request.args.get("sort") == "price_diff_asc" %}selected{% endif %}>Piaci átlag alatt</option>
+                        <option value="price_diff_desc" {% if request.args.get("sort") == "price_diff_desc" %}selected{% endif %}>Piaci átlag felett</option>
+                        <option value="price_asc" {% if request.args.get("sort") == "price_asc" %}selected{% endif %}>Ár szerint növekvő</option>
+                        <option value="price_desc" {% if request.args.get("sort") == "price_desc" %}selected{% endif %}>Ár szerint csökkenő</option>
+                        <option value="size_asc" {% if request.args.get("sort") == "size_asc" %}selected{% endif %}>Méret szerint növekvő</option>
+                        <option value="size_desc" {% if request.args.get("sort") == "size_desc" %}selected{% endif %}>Méret szerint csökkenő</option>
+                    </select>
+                    <button type="submit" class="btn btn-secondary">Rendezés</button>
+                </div>
+            </div>
+        </form>
+
+        <div class="table-responsive">
+            <table class="table table-bordered table-striped table-hover">
+            <thead class="table-dark">
+                <tr>
+                    <th>Link</th>
+                    <th>Cím</th>
+                    <th>Típus</th>
+                    <th>Állapot</th>
+                    <th>Ár (HUF)</th>
+                    <th>Méret (nm)</th>
+                    <th>Szobák</th>
+                    <th>Ár-Érték Index</th>
+                    <th>Érték Minősítés</th>
+                    <th>Piaci Insight</th>
+                    <th>Leírás</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for ad in ads %}
+                <tr>
+                    <td><a href="{{ ad.url }}" target="_blank">Link</a></td>
+                    <td>{{ ad['lokáció'] or ad.location }}</td>
+                    <td>{{ ad.Jelleg }}</td>
+                    <td>{{ ad['Állapot'] }}</td>
+                    <td>{{ ad.price_huf }}</td>
+                    <td>{{ ad.size }}</td>
+                    <td>{{ ad.rooms_clean|int if ad.rooms_clean else '' }}</td>
+                    <td>
+                        {% set score = ad['Ár-Érték Index']|float if ad['Ár-Érték Index'] and ad['Ár-Érték Index'] != 'None' else 0 %}
+                        <span class="badge 
+                            {% if score >= 70 %}bg-success
+                            {% elif score >= 50 %}bg-warning
+                            {% elif score > 0 %}bg-danger
+                            {% else %}bg-secondary{% endif %}">
+                            {{ ad['Ár-Érték Index'] or 'N/A' }}
+                        </span>
+                    </td>
+                    <td>
+                        <span class="badge 
+                            {% if ad['Érték Minősítés'] == 'Kiváló ár-érték arány' %}bg-success
+                            {% elif ad['Érték Minősítés'] == 'Jó ár-érték arány' %}bg-primary
+                            {% elif ad['Érték Minősítés'] == 'Piaci átlag' %}bg-info
+                            {% elif ad['Érték Minősítés'] == 'Piaci átlag felett' %}bg-warning
+                            {% elif ad['Érték Minősítés'] == 'Drága' %}bg-danger
+                            {% else %}bg-secondary{% endif %}">
+                            {{ ad['Érték Minősítés'] or 'Ismeretlen' }}
+                        </span>
+                    </td>
+                    <td>
+                        <small class="text-muted">{{ ad['Piaci Insight'] or 'Nincs adat' }}</small>
+                    </td>
+                    <td>{{ ad.description[:80] }}...</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+            </table>
+        </div>
+
+        <div class="text-center mt-4">
+            <a href="/" class="btn btn-outline-primary">Vissza a kereséshez</a>
+        </div>
+    </div>
+</body>
+</html>
